@@ -10,9 +10,9 @@ namespace C3R.MiniAdo
     public interface IQuery : IExecutionItem
     {
         new IQuery Param(IDataParameter parameter);
-        new IQuery Param(string name, object value);
-        new IQuery Param(string name, object value, DbType dbType);
-        new IQuery Param(string name, object value, DbType dbType, int size);
+        new IQuery Param(string name, object value, ParameterDirection direction = ParameterDirection.Input);        
+        new IQuery Param(string name, object value, DbType dbType, ParameterDirection direction = ParameterDirection.Input);
+        new IQuery Param(string name, object value, DbType dbType, int size, ParameterDirection direction = ParameterDirection.Input);        
 
         DataTable RunQuery();
         DataTable RunQueryReadOnly();

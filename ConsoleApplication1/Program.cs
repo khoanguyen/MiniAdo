@@ -18,21 +18,7 @@ namespace ConsoleApplication1
                 var tests = ctx.Query("SELECT * FROM Test")
                                .RunQuery<Test>();
 
-                foreach (var test in tests) Console.WriteLine(test);
-                ctx.StartTransaction();
-                Console.WriteLine(ctx.Query("INSERT INTO TEST(timestamp, tzId) VALUES(@timestamp, @tzId)")
-                                     .Param("@timestamp", DateTime.UtcNow)
-                                     .Param("@tzId", "Utah")
-                                     .Run());
-
-               
-                Console.WriteLine(ctx.Query("INSERT INTO TEST(timestamp, tzId) VALUES(@timestamp, @tzId)")
-                                     .Param("@timestamp", DateTime.UtcNow)
-                                     .Param("@tzId", "New York")
-                                     .Run());                
-
-                ctx.Commit();
-
+                foreach (var test in tests) Console.WriteLine(test);               
             }
 
             Console.WriteLine("Done !");

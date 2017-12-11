@@ -205,19 +205,35 @@ namespace C3R.MiniAdo
             return (IQuery)base.Param(parameter);
         }
 
-        IQuery IQuery.Param(string name, object value)
+        public IQuery Param(string name, object value)
         {
             return (IQuery)base.Param(name, value);
         }
 
-        IQuery IQuery.Param(string name, object value, DbType dbType)
+        IQuery IQuery.Param(string name, object value, ParameterDirection direction)
+        {
+            return (IQuery)base.Param(name, value, direction);
+        }
+
+        public IQuery Param(string name, object value, DbType dbType)
         {
             return (IQuery)base.Param(name, value, dbType);
         }
 
-        IQuery IQuery.Param(string name, object value, DbType dbType, int size)
+        IQuery IQuery.Param(string name, object value, DbType dbType, ParameterDirection direction)
+        {
+            return (IQuery)base.Param(name, value, dbType, direction);
+        }
+
+        public IQuery Param(string name, object value, DbType dbType, int size)
         {
             return (IQuery)base.Param(name, value, dbType, size);
         }
+
+        IQuery IQuery.Param(string name, object value, DbType dbType, int size, ParameterDirection direction)
+        {
+            return (IQuery)base.Param(name, value, dbType, size, direction);
+        }
+        
     }
 }

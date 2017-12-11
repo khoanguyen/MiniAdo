@@ -11,9 +11,9 @@ namespace C3R.MiniAdo
     public interface IExecutionItem : IDisposable
     {
         IExecutionItem Param(IDataParameter parameter);
-        IExecutionItem Param(string name, object value);
-        IExecutionItem Param(string name, object value, DbType dbType);
-        IExecutionItem Param(string name, object value, DbType dbType, int size);
+        IExecutionItem Param(string name, object value, ParameterDirection direction = ParameterDirection.Input);
+        IExecutionItem Param(string name, object value, DbType dbType, ParameterDirection direction = ParameterDirection.Input);
+        IExecutionItem Param(string name, object value, DbType dbType, int size, ParameterDirection direction = ParameterDirection.Input);
         IDataParameter GetParam(string name);
     }
 }

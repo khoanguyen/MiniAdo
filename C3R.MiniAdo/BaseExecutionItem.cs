@@ -29,23 +29,23 @@ namespace C3R.MiniAdo
             return this;
         }
 
-        public IExecutionItem Param(string name, object value)
+        public IExecutionItem Param(string name, object value, ParameterDirection direction = ParameterDirection.Input)
         {
-            var parameter = Context.Factory.CreateParameter(name, value);
+            var parameter = Context.Factory.CreateParameter(name, value, direction);
             Command.Parameters.Add(parameter);
             return this;
         }
 
-        public IExecutionItem Param(string name, object value, DbType dbType)
+        public IExecutionItem Param(string name, object value, DbType dbType, ParameterDirection direction = ParameterDirection.Input)
         {
-            var parameter = Context.Factory.CreateParameter(name, value, dbType);
+            var parameter = Context.Factory.CreateParameter(name, value, dbType, direction);
             Command.Parameters.Add(parameter);
             return this;
         }
 
-        public virtual IExecutionItem Param(string name, object value, DbType dbType, int size)
+        public virtual IExecutionItem Param(string name, object value, DbType dbType, int size, ParameterDirection direction = ParameterDirection.Input)
         {
-            var parameter = Context.Factory.CreateParameter(name, value, dbType, size);
+            var parameter = Context.Factory.CreateParameter(name, value, dbType, size, direction);
             return this.Param(parameter);
         }
 

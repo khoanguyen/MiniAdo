@@ -22,40 +22,44 @@ namespace C3R.MiniAdo.SqlServer
             return new SqlConnection(connectionString);
         }
 
-        public IDataParameter CreateParameter(string name, object value)
+        public IDataParameter CreateParameter(string name, object value, ParameterDirection direction = ParameterDirection.Input)
         {
-            return new SqlParameter(name, value);
+            return new SqlParameter(name, value) { Direction = direction };
         }
 
-        public IDataParameter CreateParameter(string name, object value, DbType dbType)
+        public IDataParameter CreateParameter(string name, object value, DbType dbType, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, MapDbType(dbType))
             {
-                SqlValue = value
+                SqlValue = value,
+                Direction = direction,
             };
         }
 
-        public IDataParameter CreateParameter(string name, object value, DbType dbType, int size)
+        public IDataParameter CreateParameter(string name, object value, DbType dbType, int size, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, MapDbType(dbType), size)
             {
-                SqlValue = value
+                SqlValue = value,
+                Direction = direction
             };
         }
 
-        public IDataParameter CreateParameter(string name, object value, SqlDbType dbType)
+        public IDataParameter CreateParameter(string name, object value, SqlDbType dbType, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, dbType)
             {
-                SqlValue = value
+                SqlValue = value,
+                Direction = direction
             };
         }
 
-        public IDataParameter CreateParameter(string name, object value, SqlDbType dbType, int size)
+        public IDataParameter CreateParameter(string name, object value, SqlDbType dbType, int size, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, dbType, size)
             {
-                SqlValue = value
+                SqlValue = value,
+                Direction = direction
             };
         }
 
