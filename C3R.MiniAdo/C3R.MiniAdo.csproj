@@ -46,6 +46,7 @@
     <Compile Include="ContextSettings.cs" />
     <Compile Include="IComponentFactory.cs" />
     <Compile Include="Mapping\IMapper.cs" />
+    <Compile Include="Mapping\IMappingService.cs" />
     <Compile Include="Mapping\Mapper.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="DataContext.cs" />
