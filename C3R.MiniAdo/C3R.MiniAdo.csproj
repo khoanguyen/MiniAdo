@@ -45,12 +45,10 @@
     <Compile Include="AccessMode.cs" />
     <Compile Include="ContextSettings.cs" />
     <Compile Include="IComponentFactory.cs" />
-    <Compile Include="BaseExecutionItem.cs" />
     <Compile Include="Mapping\IMapper.cs" />
     <Compile Include="Mapping\Mapper.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="DataContext.cs" />
-    <Compile Include="IExecutionItem.cs" />
     <Compile Include="IQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServer\MsSqlComponentFactory.cs" />

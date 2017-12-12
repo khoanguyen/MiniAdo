@@ -7,8 +7,17 @@ using System.Text;
 
 namespace C3R.MiniAdo.SqlServer
 {
+    /// <summary>
+    /// SqlServer implementation of IComponentFactory
+    /// </summary>
     class MsSqlComponentFactory : IComponentFactory
     {
+        /// <summary>
+        /// Create SqlCommand object of given command text and command type
+        /// </summary>
+        /// <param name="cmdText">Command's text</param>
+        /// <param name="cmdType">Commend's type</param>
+        /// <returns>SqlCommand object</returns>
         public IDbCommand CreateCommand(string cmdText, CommandType cmdType)
         {
             return new SqlCommand(cmdText)
@@ -17,16 +26,36 @@ namespace C3R.MiniAdo.SqlServer
             };
         }
 
+        /// <summary>
+        /// Create SqlConnection object with given connectionString
+        /// </summary>
+        /// <param name="connectionString">Database connection string</param>
+        /// <returns>SqlConnection object</returns>
         public IDbConnection CreateConnection(string connectionString)
         {
             return new SqlConnection(connectionString);
         }
 
+        /// <summary>
+        /// Create SqlParameter
+        /// </summary>
+        /// <param name="name">Parameter's name</param>
+        /// <param name="value">Parameter's value</param>
+        /// <param name="direction">Parameter's direction</param>
+        /// <returns>SqlParameter object</returns>
         public IDataParameter CreateParameter(string name, object value, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, value) { Direction = direction };
         }
 
+        /// <summary>
+        /// Creat SqlParameter
+        /// </summary>
+        /// <param name="name">Parameter's name<</param>
+        /// <param name="value">Parameter's value</param>
+        /// <param name="dbType">Parameter's Database Type</param>
+        /// <param name="direction">Parameter's direction</param>
+        /// <returns>SqlParameter object</returns>
         public IDataParameter CreateParameter(string name, object value, DbType dbType, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, MapDbType(dbType))
@@ -36,6 +65,15 @@ namespace C3R.MiniAdo.SqlServer
             };
         }
 
+        /// <summary>
+        /// Create SqlParameter
+        /// </summary>
+        /// <param name="name">Parameter's name</param>
+        /// <param name="value">Parameter's value</param>
+        /// <param name="dbType">Parameter's Database Type</param>
+        /// <param name="direction">Parameter's direction</param>                
+        /// <param name="size">Parameter's data size</param>
+        /// <returns>SqlParameter object</returns>
         public IDataParameter CreateParameter(string name, object value, DbType dbType, int size, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, MapDbType(dbType), size)
@@ -45,6 +83,13 @@ namespace C3R.MiniAdo.SqlServer
             };
         }
 
+        /// <summary>
+        /// Create SqlParameter
+        /// </summary>
+        /// <param name="name">Parameter's name</param>
+        /// <param name="value">Parameter's value</param>
+        /// <param name="dbType">Parameter's SQL Server Database Type</param>
+        /// <returns>SqlParameter object</returns>
         public IDataParameter CreateParameter(string name, object value, SqlDbType dbType, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, dbType)
@@ -54,6 +99,15 @@ namespace C3R.MiniAdo.SqlServer
             };
         }
 
+        /// <summary>
+        /// Create SqlParameter
+        /// </summary>
+        /// <param name="name">Parameter's name</param>
+        /// <param name="value">Parameter's value</param>
+        /// <param name="dbType">Parameter's Database Type</param>
+        /// <param name="direction">Parameter's SQL Server direction</param>                
+        /// <param name="size">Parameter's data size</param>
+        /// <returns>SqlParameter object</returns>
         public IDataParameter CreateParameter(string name, object value, SqlDbType dbType, int size, ParameterDirection direction = ParameterDirection.Input)
         {
             return new SqlParameter(name, dbType, size)
@@ -63,11 +117,29 @@ namespace C3R.MiniAdo.SqlServer
             };
         }
 
+        /// <summary>
+        /// Create Query object for preparing a query to database server
+        /// </summary>
+        /// <param name="context">DataContext associated with the query</param>
+        /// <param name="query">Query statement</param>
+        /// <param name="cmdType">Type of command</param>
+        /// <returns>Query object</returns>
+        /// <remarks>
+        /// Command Type should be Text or StoredProcedure. TableDirect is not supported
+        /// </remarks>
         public IQuery CreateQuery(DataContext context, string query, CommandType cmdType)
         {
+            if (cmdType == CommandType.TableDirect)
+                throw new NotSupportedException("TableDirect is not supported at the moment");
+
             return new Query(context, query, cmdType);
         }
 
+        /// <summary>
+        /// Map abstract DbType into SqlServer DbType
+        /// </summary>
+        /// <param name="dbType">Abstract DbType</param>
+        /// <returns>Sql DbType</returns>
         private SqlDbType MapDbType(DbType dbType)
         {
             switch(dbType)

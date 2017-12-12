@@ -8,14 +8,39 @@ using System.Threading.Tasks;
 
 namespace C3R.MiniAdo
 {
-    public class Query : BaseExecutionItem, IQuery
+    /// <summary>
+    /// Query object provides preparation and executes for data query to database server
+    /// </summary>
+    public class Query : IQuery, IDisposable
     {
-        public Query(DataContext context, string cmd = null, CommandType cmdType = CommandType.Text) : base(context)
+        /// <summary>
+        /// Internal DbCommand object which will be executed against database server
+        /// </summary>
+        protected IDbCommand Command { get; set; }
+
+        /// <summary>
+        /// DataContext associated with current Query object
+        /// </summary>
+        public virtual DataContext Context { get; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="context">Associated DataContext</param>
+        /// <param name="cmd">Query statement</param>
+        /// <param name="cmdType">Type of query call</param>
+        public Query(DataContext context, string cmd = null, CommandType cmdType = CommandType.Text) 
         {
+            Context = context;
             Command = Context.Factory.CreateCommand(cmd, cmdType);            
         }
 
-        public virtual DataTable RunQuery()
+        /// <summary>
+        /// Execute query against Database server and retrieve back resultsets. 
+        /// Each resultset will result into 1 DataTable.
+        /// </summary>
+        /// <returns>Collection of DataTable objects</returns>
+        public virtual IEnumerable<DataTable> RunQuery()
         {
             var conn = Context.GetConnection();
             var shouldDisposeConn = conn.State != ConnectionState.Open;
@@ -34,16 +59,30 @@ namespace C3R.MiniAdo
             }
         }
 
+        /// <summary>
+        /// Execute query against Database server, retrieve back resultsets and map result into collection of given generic type. 
+        /// Each resultset will result into 1 DataTable.
+        /// </summary>
+        /// <typeparam name="T">Type of result objects</typeparam>
+        /// <returns>Collection of mapped objects</returns>
         public virtual IEnumerable<T> RunQuery<T>()
-        {
-            var table = RunQuery();
+        {            
+            var table = RunQuery().FirstOrDefault();
+
+            if (table == null) throw new InvalidOperationException("Query does not return any result");
+
             for (var i = 0; i < table.Rows.Count; i++)
             {
                 yield return Mapper.Map<T>(table.Rows[i]);
             }
         }
 
-        public DataTable RunQueryReadOnly()
+        /// <summary>
+        /// Execute Read-only query against Database server and retrieve back resultsets. 
+        /// Each resultset will result into 1 DataTable.
+        /// </summary>
+        /// <returns>Collection of DataTable objects</returns>
+        public virtual IEnumerable<DataTable> RunQueryReadOnly()
         {
             var conn = Context.GetConnection(AccessMode.ReadOnly);
             var shouldDisposeConn = conn.State != ConnectionState.Open;
@@ -62,16 +101,29 @@ namespace C3R.MiniAdo
             }
         }
 
-        public IEnumerable<T> RunQueryReadOnly<T>()
-        {
-            var table = RunQueryReadOnly();
+        /// <summary>
+        /// Execute Read-only query against Database server, retrieve back resultsets and map result into collection of given generic type. 
+        /// Each resultset will result into 1 DataTable.
+        /// </summary>
+        /// <typeparam name="T">Type of result objects</typeparam>
+        /// <returns>Collection of mapped objects</returns>
+        public virtual IEnumerable<T> RunQueryReadOnly<T>()
+        {            
+            var table = RunQueryReadOnly().FirstOrDefault();
+
+            if (table == null) throw new InvalidOperationException("Query does not return any result");
+
             for (var i = 0; i < table.Rows.Count; i++)
             {
                 yield return Mapper.Map<T>(table.Rows[i]);
             }
         }
 
-        public object RunScalar()
+        /// <summary>
+        /// Execute scalar query against database server
+        /// </summary>
+        /// <returns>Scalar result</returns>
+        public virtual object RunScalar()
         {
             var conn = Context.GetConnection();
             var shouldDisposeConn = conn.State != ConnectionState.Open;
@@ -90,7 +142,11 @@ namespace C3R.MiniAdo
             }
         }
 
-        public object RunScalarReadOnly()
+        /// <summary>
+        /// Execute Read-only scalar query against database server
+        /// </summary>
+        /// <returns>Scalar result</returns>
+        public virtual object RunScalarReadOnly()
         {
             var conn = Context.GetConnection(AccessMode.ReadOnly);
             var shouldDisposeConn = conn.State != ConnectionState.Open;
@@ -109,17 +165,31 @@ namespace C3R.MiniAdo
             }
         }
 
-        public T RunScalar<T>()
+        /// <summary>
+        /// Execute scalar query against database server and convert result to given generic type
+        /// </summary>
+        /// <typeparam name="T">Type of result</typeparam>
+        /// <returns>Scalar result of given generic type</returns>
+        public virtual T RunScalar<T>()
         {
             return (T)RunScalar();
         }
 
-        public T RunScalarReadOnly<T>()
+        /// <summary>
+        /// Execute Read-only scalar query against database server and convert result to given generic type
+        /// </summary>
+        /// <typeparam name="T">Type of result</typeparam>
+        /// <returns>Scalar result of given generic type</returns>
+        public virtual T RunScalarReadOnly<T>()
         {
             return (T)RunScalarReadOnly();
         }
 
-        public int Run()
+        /// <summary>
+        /// Execute non-query query against database server
+        /// </summary>
+        /// <returns>Integer value returned by server</returns>
+        public virtual int Run()
         {
             var conn = Context.GetConnection();
             var shouldDisposeConn = conn.State != ConnectionState.Open;
@@ -138,7 +208,11 @@ namespace C3R.MiniAdo
             }
         }
 
-        public int RunReaOnly()
+        /// <summary>
+        /// Execute Read-only non-query query against database server
+        /// </summary>
+        /// <returns>Integer value returned by server</returns>
+        public virtual int RunReaOnly()
         {
             var conn = Context.GetConnection(AccessMode.ReadOnly);
             var shouldDisposeConn = conn.State != ConnectionState.Open;
@@ -157,35 +231,50 @@ namespace C3R.MiniAdo
             }
         }
 
-        public override void Dispose()
+        /// <summary>
+        /// Dispose current query
+        /// </summary>
+        public virtual void Dispose()
         {
             this.Command.Dispose();
         }
 
-        protected virtual DataTable RunQueryInternal(IDbConnection conn)
-        {
-            var result = new DataTable();
-
+        /// <summary>
+        /// Run query and return a collection of DataTable
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        protected virtual IEnumerable<DataTable> RunQueryInternal(IDbConnection conn)
+        {            
             Command.Connection = conn;
             Command.Transaction = Context.CurrentTransaction;
             using (var reader = Command.ExecuteReader())
             {
-                for (var i = 0; i < reader.FieldCount; i++)
+                do
                 {
-                    result.Columns.Add(new DataColumn(reader.GetName(i), reader.GetFieldType(i)));
-                }
+                    var table = new DataTable();
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        table.Columns.Add(new DataColumn(reader.GetName(i), reader.GetFieldType(i)));
+                    }
 
-                while (reader.Read())
-                {
-                    var values = new object[reader.FieldCount];
-                    reader.GetValues(values);
-                    result.Rows.Add(values);
-                }
+                    while (reader.Read())
+                    {
+                        var values = new object[reader.FieldCount];
+                        reader.GetValues(values);
+                        table.Rows.Add(values);
+                    }
+
+                    yield return table;                    
+                } while (reader.NextResult());
             }
-
-            return result;
         }
 
+        /// <summary>
+        /// Run scalar query and return scalar value
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
         protected virtual object RunScalarInternal(IDbConnection conn)
         {
             Command.Connection = conn;
@@ -193,6 +282,11 @@ namespace C3R.MiniAdo
             return Command.ExecuteScalar();
         }
 
+        /// <summary>
+        /// Run non-query query and return integer value returned by server
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
         protected virtual int RunInternal(IDbConnection conn)
         {
             Command.Connection = conn;
@@ -200,40 +294,92 @@ namespace C3R.MiniAdo
             return Command.ExecuteNonQuery();
         }
 
-        IQuery IQuery.Param(IDataParameter parameter)
+        /// <summary>
+        /// Get DataParameter with given name
+        /// </summary>
+        /// <param name="name">Parameter's name</param>
+        /// <returns>DataParameter object associated with current Query</returns>
+        /// <exception cref="System.EntryPointNotFoundException">
+        /// DataParameter with given name does not exist in the current Query object
+        /// </exception>
+        public virtual IDataParameter GetParam(string name)
         {
-            return (IQuery)base.Param(parameter);
+            if (!Command.Parameters.Contains(name))
+                throw new EntryPointNotFoundException($"Parameter {name} not found");
+
+            return Command.Parameters[name] as IDataParameter;
         }
 
-        public IQuery Param(string name, object value)
+        /// <summary>
+        /// Add given DataParameter to query object
+        /// </summary>
+        /// <param name="parameter">DataParameter object</param> 
+        public virtual IQuery Param(IDataParameter parameter)
         {
-            return (IQuery)base.Param(name, value);
+            Command.Parameters.Add(parameter);
+            return this;
         }
 
-        IQuery IQuery.Param(string name, object value, ParameterDirection direction)
+        /// <summary>
+        /// Add a DataParemeter to query object
+        /// </summary>
+        /// <param name="name">Parameter's name</param>
+        /// <param name="value">Parameter's value</param>
+        /// <param name="direction">Parameter's direction</param>
+        /// <returns></returns>
+        public virtual IQuery Param(string name, object value, ParameterDirection direction = ParameterDirection.Input)
         {
-            return (IQuery)base.Param(name, value, direction);
+            var parameter = Context.Factory.CreateParameter(name, value, direction);
+            Command.Parameters.Add(parameter);
+            return this;
         }
 
-        public IQuery Param(string name, object value, DbType dbType)
+        /// <summary>
+        /// Add a DataParemeter to query object
+        /// </summary>
+        /// <param name="name">Parameter's name</param>
+        /// <param name="value">Parameter's value</param>
+        /// <param name="dbType">Parameter's DbType</param>
+        /// <param name="direction">Parameter's direction</param>
+        /// <returns></returns>
+        public virtual IQuery Param(string name, object value, DbType dbType, ParameterDirection direction = ParameterDirection.Input)
         {
-            return (IQuery)base.Param(name, value, dbType);
+            var parameter = Context.Factory.CreateParameter(name, value, dbType, direction);
+            Command.Parameters.Add(parameter);
+            return this;
         }
 
-        IQuery IQuery.Param(string name, object value, DbType dbType, ParameterDirection direction)
+        /// <summary>
+        /// Add a DataParemeter to query object
+        /// </summary>
+        /// <param name="name">Parameter's name</param>
+        /// <param name="value">Parameter's value</param>
+        /// <param name="dbType">Parameter's DbType</param>
+        /// <param name="size">Parameter's DbType size</param>
+        /// <param name="direction">Parameter's direction</param>
+        /// <returns></returns>
+        public virtual IQuery Param(string name, object value, DbType dbType, int size, ParameterDirection direction = ParameterDirection.Input)
         {
-            return (IQuery)base.Param(name, value, dbType, direction);
+            var parameter = Context.Factory.CreateParameter(name, value, dbType, size, direction);
+            return this.Param(parameter);
         }
 
-        public IQuery Param(string name, object value, DbType dbType, int size)
+        /// <summary>
+        /// Append given query into the end of current query
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        public IQuery AppendQuery(string query)
         {
-            return (IQuery)base.Param(name, value, dbType, size);
-        }
+            var currentQuery = Command.CommandText;
 
-        IQuery IQuery.Param(string name, object value, DbType dbType, int size, ParameterDirection direction)
-        {
-            return (IQuery)base.Param(name, value, dbType, size, direction);
+            Command.CommandText = string.Join(";", new[]
+            {
+                currentQuery.TrimEnd(';'),
+                query.TrimStart(';')
+            });
+
+            return this;
         }
-        
     }
 }

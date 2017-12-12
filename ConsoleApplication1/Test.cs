@@ -13,7 +13,7 @@ namespace ConsoleApplication1
 
         public override string ToString()
         {
-            return $"[Id:{Id}, Timestamp:{Timestamp.HasValue}, TzId: {TzId}]";
+            return $"[Id:{Id}, Timestamp:{(Timestamp.HasValue ? Timestamp.Value.ToString() : "<null>")}, TzId: {TzId}]";
         }
     }
 }
