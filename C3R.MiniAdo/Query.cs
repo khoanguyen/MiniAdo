@@ -11,12 +11,12 @@ namespace C3R.MiniAdo
     /// <summary>
     /// Query object provides preparation and executes for data query to database server
     /// </summary>
-    public class Query : IQuery, IDisposable
+    public abstract class Query : IQuery, IDisposable
     {
         /// <summary>
         /// Internal DbCommand object which will be executed against database server
         /// </summary>
-        protected IDbCommand Command { get; set; }
+        protected virtual IDbCommand Command { get; set; }
 
         /// <summary>
         /// DataContext associated with current Query object
@@ -24,15 +24,37 @@ namespace C3R.MiniAdo
         public virtual DataContext Context { get; }
 
         /// <summary>
+        /// Command type of the query
+        /// </summary>
+        public virtual CommandType CommandType
+        {
+            get
+            {
+                return Command.CommandType;
+            }
+        }
+
+        /// <summary>
+        /// Query statement of current query
+        /// </summary>
+        public virtual string QueryText
+        {
+            get
+            {
+                return Command.CommandText;
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="context">Associated DataContext</param>
         /// <param name="cmd">Query statement</param>
         /// <param name="cmdType">Type of query call</param>
-        public Query(DataContext context, string cmd = null, CommandType cmdType = CommandType.Text) 
+        public Query(DataContext context, string cmd = null, CommandType cmdType = CommandType.Text)
         {
             Context = context;
-            Command = Context.Factory.CreateCommand(cmd, cmdType);            
+            Command = Context.Factory.CreateCommand(cmd ?? "", cmdType);
         }
 
         /// <summary>
@@ -66,7 +88,7 @@ namespace C3R.MiniAdo
         /// <typeparam name="T">Type of result objects</typeparam>
         /// <returns>Collection of mapped objects</returns>
         public virtual IEnumerable<T> RunQuery<T>()
-        {            
+        {
             var table = RunQuery().FirstOrDefault();
 
             if (table == null) throw new InvalidOperationException("Query does not return any result");
@@ -108,7 +130,7 @@ namespace C3R.MiniAdo
         /// <typeparam name="T">Type of result objects</typeparam>
         /// <returns>Collection of mapped objects</returns>
         public virtual IEnumerable<T> RunQueryReadOnly<T>()
-        {            
+        {
             var table = RunQueryReadOnly().FirstOrDefault();
 
             if (table == null) throw new InvalidOperationException("Query does not return any result");
@@ -231,68 +253,6 @@ namespace C3R.MiniAdo
             }
         }
 
-        /// <summary>
-        /// Dispose current query
-        /// </summary>
-        public virtual void Dispose()
-        {
-            this.Command.Dispose();
-        }
-
-        /// <summary>
-        /// Run query and return a collection of DataTable
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <returns></returns>
-        protected virtual IEnumerable<DataTable> RunQueryInternal(IDbConnection conn)
-        {            
-            Command.Connection = conn;
-            Command.Transaction = Context.CurrentTransaction;
-            using (var reader = Command.ExecuteReader())
-            {
-                do
-                {
-                    var table = new DataTable();
-                    for (var i = 0; i < reader.FieldCount; i++)
-                    {
-                        table.Columns.Add(new DataColumn(reader.GetName(i), reader.GetFieldType(i)));
-                    }
-
-                    while (reader.Read())
-                    {
-                        var values = new object[reader.FieldCount];
-                        reader.GetValues(values);
-                        table.Rows.Add(values);
-                    }
-
-                    yield return table;                    
-                } while (reader.NextResult());
-            }
-        }
-
-        /// <summary>
-        /// Run scalar query and return scalar value
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <returns></returns>
-        protected virtual object RunScalarInternal(IDbConnection conn)
-        {
-            Command.Connection = conn;
-            Command.Transaction = Context.CurrentTransaction;
-            return Command.ExecuteScalar();
-        }
-
-        /// <summary>
-        /// Run non-query query and return integer value returned by server
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <returns></returns>
-        protected virtual int RunInternal(IDbConnection conn)
-        {
-            Command.Connection = conn;
-            Command.Transaction = Context.CurrentTransaction;
-            return Command.ExecuteNonQuery();
-        }
 
         /// <summary>
         /// Get DataParameter with given name
@@ -371,15 +331,99 @@ namespace C3R.MiniAdo
         /// <returns></returns>
         public IQuery AppendQuery(string query)
         {
-            var currentQuery = Command.CommandText;
-
-            Command.CommandText = string.Join(";", new[]
+            lock (this.Command)
             {
-                currentQuery.TrimEnd(';'),
-                query.TrimStart(';')
-            });
+                var currentQuery = Command.CommandText;
+
+                Command.CommandText = string.Join(";", new[] {
+                    currentQuery.TrimEnd(';'),
+                    query.TrimStart(';')
+                });
+            }
 
             return this;
         }
+
+        /// <summary>
+        /// Get all Parameter added into query
+        /// </summary>
+        /// <returns></returns>
+        public virtual IEnumerable<IDataParameter> GetParams()
+        {
+            return Command.Parameters.Cast<IDataParameter>();
+        }
+
+        /// <summary>
+        /// Merge with given query
+        /// </summary>
+        /// <param name="query">query to merge with</param>
+        /// <returns>Merged query</returns>
+        public abstract IQuery Merge(IQuery query);
+
+        /// <summary>
+        /// Dispose current query
+        /// </summary>
+        public virtual void Dispose()
+        {
+            this.Command.Dispose();
+        }
+
+        /// <summary>
+        /// Run query and return a collection of DataTable
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        protected virtual IEnumerable<DataTable> RunQueryInternal(IDbConnection conn)
+        {
+            Command.Connection = conn;
+            Command.Transaction = Context.CurrentTransaction;
+            var tables = new List<DataTable>();
+            using (var reader = Command.ExecuteReader())
+            {
+                do
+                {
+                    var table = new DataTable();
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        table.Columns.Add(new DataColumn(reader.GetName(i), reader.GetFieldType(i)));
+                    }
+
+                    while (reader.Read())
+                    {
+                        var values = new object[reader.FieldCount];
+                        reader.GetValues(values);
+                        table.Rows.Add(values);
+                    }
+
+                    tables.Add(table);
+                } while (reader.NextResult());
+            }
+            return tables.ToArray();
+        }
+
+        /// <summary>
+        /// Run scalar query and return scalar value
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        protected virtual object RunScalarInternal(IDbConnection conn)
+        {
+            Command.Connection = conn;
+            Command.Transaction = Context.CurrentTransaction;
+            return Command.ExecuteScalar();
+        }
+
+        /// <summary>
+        /// Run non-query query and return integer value returned by server
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        protected virtual int RunInternal(IDbConnection conn)
+        {
+            Command.Connection = conn;
+            Command.Transaction = Context.CurrentTransaction;
+            return Command.ExecuteNonQuery();
+        }
+
     }
 }

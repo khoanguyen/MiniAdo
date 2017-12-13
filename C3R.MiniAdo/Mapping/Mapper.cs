@@ -11,7 +11,13 @@ namespace C3R.MiniAdo.Mapping
     {
         private static Dictionary<string, object> _mapper = new Dictionary<string, object>();
 
-        
+        public static IMapperProvider MapperProvider { get; set; }
+
+        static Mapper()
+        {
+            MapperProvider = new DefaultMapperProvider();
+        }
+
         public static T Map<T>(DataRow row)
         {
             return GetMapper<T>().Map(row);                
@@ -37,22 +43,15 @@ namespace C3R.MiniAdo.Mapping
             GetMapper<T>().Populate(row, target);
         }
 
-        public static void RegisterMapper<T>(IMapper<T> mapper)
-        {
-            _mapper[typeof(T).FullName] = mapper;
-        }
-
         private static IMapper<T> GetMapper<T>()
         {
-            var key = typeof(T).FullName;
-            if (_mapper.ContainsKey(key))
-            {
-                return (IMapper<T>)_mapper[key];
-            }
-            else
-            {
-                throw new NotSupportedException($"No mapper was registered for {typeof(T).Name}");
-            }
+            if (MapperProvider == null) throw new InvalidOperationException("No MapperProvider was set");
+
+            var mapper = MapperProvider.GetMapper<T>();            
+
+            if (mapper == null) throw new NotSupportedException($"No mapper was registered for {typeof(T).Name}");
+
+            return mapper;
         }        
     }
 }

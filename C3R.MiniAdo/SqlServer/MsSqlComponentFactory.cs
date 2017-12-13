@@ -132,7 +132,7 @@ namespace C3R.MiniAdo.SqlServer
             if (cmdType == CommandType.TableDirect)
                 throw new NotSupportedException("TableDirect is not supported at the moment");
 
-            return new Query(context, query, cmdType);
+            return new MsSqlQuery(context, query, cmdType);
         }
 
         /// <summary>

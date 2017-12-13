@@ -96,6 +96,16 @@ namespace C3R.MiniAdo
         }
 
         /// <summary>
+        /// Create a query object for preparing stored procedure call
+        /// </summary>
+        /// <param name="procName">Name of stored procedure to be called</param>
+        /// <returns>IQuery object</returns>
+        public virtual IQuery Proc(string procName)
+        {
+            return Factory.CreateQuery(this, procName, CommandType.StoredProcedure);
+        }
+
+        /// <summary>
         /// Start a Transaction
         /// </summary>
         /// <param name="isolationLevel">Isolation level of the starting Transaction (Optional)</param>

@@ -5,9 +5,8 @@ using System.Text;
 
 namespace C3R.MiniAdo.Mapping
 {
-    public interface IMappingService
+    public interface IMapperProvider
     {
-        object Map(object source, Type targetType);
-        void Populate(object source, object target);
+        IMapper<T> GetMapper<T>();
     }
 }

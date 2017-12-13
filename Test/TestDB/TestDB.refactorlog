@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="e45e4ed3-b8c1-4c5b-9223-5e91c9b218e4" ChangeDateTime="12/12/2017 17:58:07">
+    <Property Name="ElementName" Value="[dbo].[Program].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Program]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ProgramId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d0a93756-6797-4497-b0f8-5dcf622be650" ChangeDateTime="12/12/2017 17:59:01">
+    <Property Name="ElementName" Value="[dbo].[Majors].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Majors]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="MajorId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="423f8266-18f8-4d34-bffc-2f81cff9769e" ChangeDateTime="12/12/2017 18:00:19">
+    <Property Name="ElementName" Value="[dbo].[FK_Program_ToTable]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[Program]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_Programs_Majors]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a62865fb-04e6-48a5-ad54-076f08ccf4c3" ChangeDateTime="12/12/2017 18:12:06">
+    <Property Name="ElementName" Value="[dbo].[FK_Enrollment_Programs]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[Enrollment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_Enrollments_Programs]" />
+  </Operation>
+</Operations>

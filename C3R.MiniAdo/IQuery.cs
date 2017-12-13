@@ -13,6 +13,16 @@ namespace C3R.MiniAdo
     public interface IQuery
     {
         /// <summary>
+        /// Command type of the query
+        /// </summary>
+        CommandType CommandType { get; }
+
+        /// <summary>
+        /// Query statement of current query
+        /// </summary>
+        string QueryText { get; }
+
+        /// <summary>
         /// Add given DataParameter to query object
         /// </summary>
         /// <param name="parameter">DataParameter object</param>        
@@ -57,6 +67,12 @@ namespace C3R.MiniAdo
         /// DataParameter with given name does not exist in the current Query object
         /// </exception>
         IDataParameter GetParam(string name);
+
+        /// <summary>
+        /// Get all Parameter added into query
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<IDataParameter> GetParams();
 
         /// <summary>
         /// Execute query against Database server and retrieve back resultsets. 
@@ -132,6 +148,13 @@ namespace C3R.MiniAdo
         /// <param name="query"></param>
         /// <returns></returns>
         IQuery AppendQuery(string query);
+
+        /// <summary>
+        /// Merge with given query
+        /// </summary>
+        /// <param name="query">query to merge with</param>
+        /// <returns>Merged query</returns>
+        IQuery Merge(IQuery query);
     }
 
 }
