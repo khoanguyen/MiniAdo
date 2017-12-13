@@ -234,7 +234,7 @@ namespace C3R.MiniAdo
         /// Execute Read-only non-query query against database server
         /// </summary>
         /// <returns>Integer value returned by server</returns>
-        public virtual int RunReaOnly()
+        public virtual int RunReadOnly()
         {
             var conn = Context.GetConnection(AccessMode.ReadOnly);
             var shouldDisposeConn = conn.State != ConnectionState.Open;

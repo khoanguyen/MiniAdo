@@ -140,7 +140,7 @@ namespace C3R.MiniAdo
         /// Execute Read-only non-query query against database server
         /// </summary>
         /// <returns>Integer value returned by server</returns>
-        int RunReaOnly();
+        int RunReadOnly();
 
         /// <summary>
         /// Append given query into the end of current query
