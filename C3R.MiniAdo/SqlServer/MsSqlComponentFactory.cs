@@ -45,7 +45,7 @@ namespace C3R.MiniAdo.SqlServer
         /// <returns>SqlParameter object</returns>
         public IDataParameter CreateParameter(string name, object value, ParameterDirection direction = ParameterDirection.Input)
         {
-            return new SqlParameter(name, value) { Direction = direction };
+            return new SqlParameter(name, DbValueOf(value)) { Direction = direction };
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace C3R.MiniAdo.SqlServer
         {
             return new SqlParameter(name, MapDbType(dbType))
             {
-                SqlValue = value,
+                SqlValue = DbValueOf(value),
                 Direction = direction,
             };
         }
@@ -78,7 +78,7 @@ namespace C3R.MiniAdo.SqlServer
         {
             return new SqlParameter(name, MapDbType(dbType), size)
             {
-                SqlValue = value,
+                SqlValue = DbValueOf(value),
                 Direction = direction
             };
         }
@@ -94,7 +94,7 @@ namespace C3R.MiniAdo.SqlServer
         {
             return new SqlParameter(name, dbType)
             {
-                SqlValue = value,
+                SqlValue = DbValueOf(value),
                 Direction = direction
             };
         }
@@ -112,7 +112,7 @@ namespace C3R.MiniAdo.SqlServer
         {
             return new SqlParameter(name, dbType, size)
             {
-                SqlValue = value,
+                SqlValue = DbValueOf(value),
                 Direction = direction
             };
         }
@@ -142,7 +142,7 @@ namespace C3R.MiniAdo.SqlServer
         /// <returns>Sql DbType</returns>
         private SqlDbType MapDbType(DbType dbType)
         {
-            switch(dbType)
+            switch (dbType)
             {
                 case DbType.AnsiString: return SqlDbType.VarChar;
                 case DbType.AnsiStringFixedLength: return SqlDbType.Char;
@@ -154,7 +154,7 @@ namespace C3R.MiniAdo.SqlServer
                 case DbType.DateTime: return SqlDbType.DateTime;
                 case DbType.DateTime2: return SqlDbType.DateTime2;
                 case DbType.DateTimeOffset: return SqlDbType.DateTimeOffset;
-                case DbType.Decimal: return SqlDbType.Decimal;                
+                case DbType.Decimal: return SqlDbType.Decimal;
                 case DbType.Double: return SqlDbType.Float;
                 case DbType.Guid: return SqlDbType.UniqueIdentifier;
                 case DbType.Int16: return SqlDbType.SmallInt;
@@ -170,10 +170,15 @@ namespace C3R.MiniAdo.SqlServer
                 case DbType.UInt32: return SqlDbType.Int;
                 case DbType.UInt64: return SqlDbType.BigInt;
                 case DbType.VarNumeric: return SqlDbType.Decimal;
-                case DbType.Xml: return SqlDbType.Xml;                
+                case DbType.Xml: return SqlDbType.Xml;
                 default:
                     throw new NotSupportedException($"{dbType.ToString()} is not supported");
             }
+        }
+
+        private object DbValueOf(object val)
+        {
+            return val ?? DBNull.Value;
         }
     }
 }

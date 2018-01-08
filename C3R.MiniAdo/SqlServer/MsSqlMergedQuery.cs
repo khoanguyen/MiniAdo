@@ -8,22 +8,47 @@ using System.Threading;
 
 namespace C3R.MiniAdo.SqlServer
 {
+    /// <summary>
+    /// MsSqlQuery that provides Query Merging feature
+    /// </summary>
     class MsSqlMergedQuery : MsSqlQuery
     {
+        /// <summary>
+        /// Trie for interpreting Query's params
+        /// </summary>
         private class Trie
         {
+            /// <summary>
+            /// Gets and Sets Trie node's character (value of Trie node)
+            /// </summary>
             public char Char { get; set; }
+
+            /// <summary>
+            /// Gets dictionary of Trie's children
+            /// </summary>
             public Dictionary<char, Trie> Children { get; private set; } = new Dictionary<char, Trie>();
+
+            /// <summary>
+            /// Gets if Trie node is leaf node
+            /// </summary>
             public bool IsLeaf
             {
                 get { return Children.Count == 0; }
             }
 
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="val"></param>
             public Trie(char val)
             {
                 this.Char = val;
             }
 
+            /// <summary>
+            /// Adds the given string to Trie structure starting from current node
+            /// </summary>
+            /// <param name="s">String to add</param>
             public void Add(string s)
             {
                 var cur = this;
@@ -35,14 +60,29 @@ namespace C3R.MiniAdo.SqlServer
                 }
             }
         }
+
+        /// <summary>
+        /// Query index counter for creating unique index when rebuilding queries.
+        /// </summary>
         private volatile int _counter;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="query1"></param>
+        /// <param name="query2"></param>
         public MsSqlMergedQuery(DataContext context, MsSqlQuery query1, MsSqlQuery query2) : base(context, "", CommandType.Text)
         {
             this.Merge(query1);
             this.Merge(query2);
         }
 
+        /// <summary>
+        /// Merges given query into current query
+        /// </summary>
+        /// <param name="query">Query to be merged into current query</param>
+        /// <returns></returns>
         public override IQuery Merge(IQuery query)
         {
             var mssqlQuery = (MsSqlQuery)query;
@@ -54,8 +94,8 @@ namespace C3R.MiniAdo.SqlServer
                 var currentQuery = Command.CommandText;
 
                 Command.CommandText = string.Join(";", new[] {
-                    currentQuery.TrimEnd(';'),
-                    newQuery.TrimStart(';')
+                    currentQuery.Trim(';'),
+                    newQuery.Trim(';')
                 });
 
                 foreach (var p in (IEnumerable<SqlParameter>)rebuilt[1])
@@ -67,17 +107,27 @@ namespace C3R.MiniAdo.SqlServer
             return this;
         }
 
+        /// <summary>
+        /// Rebuilds a Command object of from given text and parameter, 
+        /// makes it unique to integrate into current query
+        /// </summary>
+        /// <param name="cmdText"></param>
+        /// <param name="parameters"></param>
+        /// <param name="cmdType"></param>
+        /// <returns></returns>
         private object[] RebuildCommand(string cmdText, IEnumerable<SqlParameter> parameters, CommandType cmdType)
         {
-            var tokens = TokenizeCommand(cmdText,parameters);
+            var tokens = TokenizeCommand(cmdText, parameters);
             var builder = new StringBuilder();
-            var counter = Interlocked.Increment(ref _counter);
 
             if (cmdType == CommandType.StoredProcedure) builder.Append("exec ");
             var newParams = new Dictionary<string, SqlParameter>();
 
             var paramDic = parameters.ToDictionary(p => p.ParameterName, p => p);
-            var paramNameMap = paramDic.ToDictionary(kvp => kvp.Key, kvp => $"{kvp.Key}_{counter}");
+            var paramNameMap = paramDic.ToDictionary(kvp => kvp.Key, kvp => {
+                var counter = Interlocked.Increment(ref _counter);
+                return $"@p{counter}";
+            });
 
             foreach (var token in tokens)
             {
@@ -91,7 +141,7 @@ namespace C3R.MiniAdo.SqlServer
                         {
                             SqlValue = param.SqlValue
                         });
-                    }                    
+                    }
                     builder.Append(newName);
                 }
                 else
@@ -124,6 +174,11 @@ namespace C3R.MiniAdo.SqlServer
             };
         }
 
+        /// <summary>
+        /// Builds a Trie from parameter list
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         private Trie GetParameterTrie(IEnumerable<SqlParameter> parameters)
         {
             var root = new Trie('@');
@@ -136,6 +191,12 @@ namespace C3R.MiniAdo.SqlServer
             return root;
         }
 
+        /// <summary>
+        /// Splits cmdText into chunks(tokens) by parameter names
+        /// </summary>
+        /// <param name="cmdText"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         private string[] TokenizeCommand(string cmdText, IEnumerable<SqlParameter> parameters)
         {
             var tokens = new List<string>();
@@ -184,6 +245,12 @@ namespace C3R.MiniAdo.SqlServer
             return tokens.ToArray();
         }
 
+        /// <summary>
+        /// Checks if given character is valid 
+        /// </summary>
+        /// <param name="ch"></param>
+        /// <param name="isFirst"></param>
+        /// <returns></returns>
         private bool IsValidParameterChar(char ch, bool isFirst)
         {
             return (isFirst ? Char.IsLetter(ch) : Char.IsLetterOrDigit(ch)) ||
