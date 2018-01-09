@@ -26,7 +26,7 @@ using (var context = new MsSqlDataContext(connStr))
 
 ## Read/Write Splitting 
 
-For providing suppoprt of Read/Write splitting, DataContext class allow setting a Read-Only connection string so that
+For providing support of Read/Write splitting, DataContext class allowa setting a Read-Only connection string so that
 when running RunQueryReadOnly or RunScalarReadOnly, Read-Only connection string will be used for accessing Read-Only server
 
 Simpler code of accessing Read/Write splitting databases 
@@ -40,7 +40,7 @@ using (var context = new MsSqlDataContext(writeConnString, readOnlyConnStr))
     
     /// Access read server    
     tables = ctx.Query("SELECT * FROM Students; SELECT * FROM Programs")
-                    .RunQuery().ToArray();    
+                    .RunQueryReadOnly().ToArray();    
 }
 ```
 
