@@ -183,6 +183,7 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -191,6 +192,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertEx.cs" />
+    <Compile Include="MiniAdo_TransactionScopeTest.cs" />
+    <Compile Include="MiniAdo_DotNetTransactionTest.cs" />
     <Compile Include="MiniAdo_MappingTest.cs" />
     <Compile Include="MiniAdo_StoredProcTest.cs" />
     <Compile Include="Data\Enrollment.cs" />
@@ -199,6 +202,7 @@
     <Compile Include="MiniAdo_QueryTest.cs" />
     <Compile Include="Data\Student.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="MiniAdo_ProvidedTransactionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDataManager.cs" />
   </ItemGroup>

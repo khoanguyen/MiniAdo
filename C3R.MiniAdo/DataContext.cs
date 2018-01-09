@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -36,7 +37,7 @@ namespace C3R.MiniAdo
         /// Connection to database server
         /// </summary>
         protected IDbConnection Connection { get; set; }
-     
+
         /// <summary>
         /// Settings of current DataContext
         /// </summary>
@@ -45,11 +46,12 @@ namespace C3R.MiniAdo
         /// <summary>
         /// Current pending Transaction
         /// </summary>
-        protected internal IDbTransaction CurrentTransaction {
+        protected internal IDbTransaction CurrentTransaction
+        {
             get;
             protected set;
         }
-        
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -129,7 +131,7 @@ namespace C3R.MiniAdo
             else _closeConnOnEndTrans = false;
 
             var trans = isolationLevel.HasValue ?
-                conn.BeginTransaction(isolationLevel.Value) : 
+                conn.BeginTransaction(isolationLevel.Value) :
                 conn.BeginTransaction();
 
             CurrentTransaction = trans;
@@ -144,13 +146,23 @@ namespace C3R.MiniAdo
         {
             if (CurrentTransaction != null)
             {
-                CurrentTransaction.Commit();
-                CurrentTransaction.Dispose();
-                CurrentTransaction = null;
-                if (_closeConnOnEndTrans) CloseConnection();
+                try
+                {
+                    CurrentTransaction.Commit();
+                    CurrentTransaction.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    CurrentTransaction = null;
+                    if (_closeConnOnEndTrans) CloseConnection();
+                }
             }
         }
-        
+
         /// <summary>
         /// Rollback current pending Transaction
         /// </summary>
@@ -158,13 +170,23 @@ namespace C3R.MiniAdo
         {
             if (CurrentTransaction != null)
             {
-                CurrentTransaction.Rollback();
-                CurrentTransaction.Dispose();
-                CurrentTransaction = null;
-                if (_closeConnOnEndTrans) CloseConnection();
+                try
+                {
+                    CurrentTransaction.Rollback();
+                    CurrentTransaction.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    CurrentTransaction = null;
+                    if (_closeConnOnEndTrans) CloseConnection();
+                }
             }
         }
-        
+
         /// <summary>
         /// Dispose this DataContext        
         /// </summary>
@@ -220,6 +242,6 @@ namespace C3R.MiniAdo
                 Connection = null;
                 _closeConnOnEndTrans = true;
             }
-        }        
+        }
     }
 }

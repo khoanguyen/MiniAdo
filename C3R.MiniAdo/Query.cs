@@ -93,10 +93,7 @@ namespace C3R.MiniAdo
 
             if (table == null) throw new InvalidOperationException("Query does not return any result");
 
-            for (var i = 0; i < table.Rows.Count; i++)
-            {
-                yield return Mapper.Map<T>(table.Rows[i]);
-            }
+            return Mapper.Map<T>(table);
         }
 
         /// <summary>
@@ -135,10 +132,7 @@ namespace C3R.MiniAdo
 
             if (table == null) throw new InvalidOperationException("Query does not return any result");
 
-            for (var i = 0; i < table.Rows.Count; i++)
-            {
-                yield return Mapper.Map<T>(table.Rows[i]);
-            }
+            return Mapper.Map<T>(table);
         }
 
         /// <summary>
