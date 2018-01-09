@@ -389,6 +389,7 @@ using (var ctx = new MsSqlDataContext(connStr))
 ```
 
 Multiple Procedure call with Merge.
+
 AppendQuery is **not recommended**
 
 ```
