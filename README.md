@@ -12,7 +12,7 @@ DataContext abstract class is the primary class for providing components and con
 
 DataContext is **NOT** a UnitOfWork pattern
 
-This library does not focusing on implementing UnitOfWork.
+This library does not focus on implementing UnitOfWork.
 
 ## SQL Server
 The implementation for Sql Server is MsSqlDataContext.
