@@ -4,7 +4,7 @@ A .NET lightweight library for accessing database
 
 ## Currently Support
 
-- Microsoft MS SQL
+- Microsoft SQL Server
 - .NET Standard 2.0 and .NET 4.0+
 
 ## DataContext
