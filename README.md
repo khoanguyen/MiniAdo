@@ -2,6 +2,11 @@
 
 A .NET lightweight library for accessing database
 
+## Currently Support
+
+- Microsoft MS SQL
+- .NET Standard 2.0 and .NET 4.0+
+
 ## DataContext
 
 DataContext abstract class is the primary class for providing components and configurations
