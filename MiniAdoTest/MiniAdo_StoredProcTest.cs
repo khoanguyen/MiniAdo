@@ -214,7 +214,8 @@ namespace MiniAdoTest
                 var proc1 = ctx.Proc(procName1).Param("@programId", 1);
                 var proc2 = ctx.Proc(procName2).Param(ctx.Factory.CreateParameter("@programId", 1, DbType.Int32));
                 var proc3 = ctx.Proc(procName3);
-                var proc4 = ctx.Proc(procName4).Param("@programCode", "BCOSC", ParameterDirection.Input);
+                var proc4 = ctx.Query("exec " + procName4 + " @programCode=@programCode")
+                               .Param("@programCode", "BCOSC", ParameterDirection.Input);
 
                 var query = proc1
                     .Merge(proc2)

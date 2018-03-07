@@ -55,7 +55,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServer\MsSqlComponentFactory.cs" />
     <Compile Include="SqlServer\MsSqlDataContext.cs" />
-    <Compile Include="SqlServer\MsSqlMergedQuery.cs" />
     <Compile Include="SqlServer\MsSqlQuery.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
