@@ -144,9 +144,11 @@ namespace C3R.MiniAdo
 
         /// <summary>
         /// Append given query into the end of current query
+        /// Stored Procedure calls are not supported. Use Merge method for Stored Procedures
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
+        [Obsolete]
         IQuery AppendQuery(string query);
 
         /// <summary>

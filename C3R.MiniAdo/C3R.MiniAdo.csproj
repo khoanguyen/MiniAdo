@@ -45,6 +45,8 @@
     <Compile Include="AccessMode.cs" />
     <Compile Include="ContextSettings.cs" />
     <Compile Include="IComponentFactory.cs" />
+    <Compile Include="Mapping\AutoMapper.cs" />
+    <Compile Include="Mapping\AutoMapperProvider.cs" />
     <Compile Include="Mapping\DefaultMapperProvider.cs" />
     <Compile Include="Mapping\IMapper.cs" />
     <Compile Include="Mapping\IMapperProvider.cs" />

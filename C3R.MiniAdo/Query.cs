@@ -379,7 +379,10 @@ namespace C3R.MiniAdo
                     var table = new DataTable();
                     for (var i = 0; i < reader.FieldCount; i++)
                     {
-                        table.Columns.Add(new DataColumn(reader.GetName(i), reader.GetFieldType(i)));
+                        var colName = reader.GetName(i);                        
+                        var n = 1;
+                        while (table.Columns.Contains(colName)) colName = reader.GetName(i) + n++;
+                        table.Columns.Add(new DataColumn(colName, reader.GetFieldType(i)));
                     }
 
                     while (reader.Read())

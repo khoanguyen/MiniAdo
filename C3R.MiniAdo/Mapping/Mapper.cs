@@ -24,7 +24,10 @@ namespace C3R.MiniAdo.Mapping
         static Mapper()
         {
             /// Use DefaultMapperProvider by default
-            MapperProvider = new DefaultMapperProvider();
+            // MapperProvider = new DefaultMapperProvider();
+
+            /// Use AutoMapperProvider by default
+            MapperProvider = new AutoMapperProvider();
         }
 
         /// <summary>
@@ -46,11 +49,9 @@ namespace C3R.MiniAdo.Mapping
         /// <returns></returns>
         public static IEnumerable<T> Map<T>(DataTable table)
         {
-            for (var i = 0; i < table.Rows.Count; i++)
-            {
-                var row = table.Rows[i];
-                yield return Map<T>(row);
-            }
+            return table.Rows.OfType<DataRow>()
+                        .Select(Map<T>)
+                        .ToArray();            
         }
 
         /// <summary>

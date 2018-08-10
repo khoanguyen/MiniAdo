@@ -16,7 +16,7 @@ namespace MiniAdoTest
         public void OneTimeSetup()
         {
             TestDataManager.MountTestData();
-
+            Mapper.MapperProvider = new DefaultMapperProvider();
             var provider = Mapper.MapperProvider as DefaultMapperProvider;
             provider.RegisterMapper<Student>(new StudentMapper());
             provider.RegisterMapper<Program>(new ProgramMapper());
@@ -26,6 +26,7 @@ namespace MiniAdoTest
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
+            Mapper.MapperProvider = new AutoMapperProvider();
             TestDataManager.UnmountTestData();
         }
 
